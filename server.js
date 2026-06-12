@@ -425,6 +425,56 @@ async function handleApi(req, res) {
     return json(res, 200, buildState(me));
   }
 
+  if (req.method === 'POST' && route === '/api/changepin') {
+    const { pin } = await readBody(req);
+    if (String(pin || '').length < 4) return json(res, 400, { error: 'PIN must be at least 4 characters.' });
+    const u = db.users[me.username];
+    u.salt = crypto.randomBytes(16).toString('hex');
+    u.hash = hashPin(String(pin), u.salt);
+    const myToken = (req.headers.authorization || '').slice(7);
+    for (const [tok, name] of Object.entries(db.tokens)) {
+      if (name === me.username && tok !== myToken) delete db.tokens[tok];
+    }
+    saveDb();
+    return json(res, 200, { ok: true });
+  }
+
+  // Admin: record pre-app picks for friends — creates accounts if needed and
+  // writes predictions even for locked matches (migration of off-app picks).
+  if (req.method === 'POST' && route === '/api/backfill') {
+    if (!me.admin) return json(res, 403, { error: 'Only the admin can backfill picks.' });
+    const { entries } = await readBody(req);
+    if (!Array.isArray(entries)) return json(res, 400, { error: 'entries must be an array.' });
+    const created = [], updated = [];
+    for (const e of entries) {
+      const name = String(e.username || '').trim();
+      if (!VALID_USER.test(name)) return json(res, 400, { error: `Invalid username: ${name}` });
+      let existing = Object.keys(db.users).find(u => u.toLowerCase() === name.toLowerCase());
+      if (!existing) {
+        if (String(e.pin || '').length < 4) return json(res, 400, { error: `Temp PIN for ${name} must be at least 4 characters.` });
+        const salt = crypto.randomBytes(16).toString('hex');
+        db.users[name] = { hash: hashPin(String(e.pin), salt), salt, avatar: String(e.avatar || '⚽').slice(0, 8), admin: false, created: Date.now() };
+        existing = name;
+        created.push(name);
+      } else {
+        updated.push(existing);
+      }
+      for (const [noStr, p] of Object.entries(e.predictions || {})) {
+        const m = MATCH_BY_NO[Number(noStr)];
+        if (!m) return json(res, 400, { error: `Unknown match ${noStr}` });
+        const H = Math.round(Number(p.h)), A = Math.round(Number(p.a));
+        if (!Number.isFinite(H) || !Number.isFinite(A) || H < 0 || A < 0 || H > 20 || A > 20) {
+          return json(res, 400, { error: `Bad score for ${name} on match ${noStr}` });
+        }
+        const pred = { h: H, a: A };
+        if (m.round !== 'GROUP' && H === A && (p.adv === 'h' || p.adv === 'a')) pred.adv = p.adv;
+        (db.predictions[existing] = db.predictions[existing] || {})[m.no] = pred;
+      }
+    }
+    saveDb();
+    return json(res, 200, { ok: true, created, updated, state: buildState(me) });
+  }
+
   if (req.method === 'POST' && route === '/api/teamoverride') {
     if (!me.admin) return json(res, 403, { error: 'Only the admin can set knockout teams.' });
     const { matchId, side, team } = await readBody(req);

@@ -158,8 +158,20 @@ function renderUserChip() {
     <span class="uc-av">${esc(S.me.avatar)}</span>
     <span class="uc-name">${esc(S.me.username)}<small>${me ? me.total : 0} pts · #${rank}</small></span>
     ${S.me.admin ? '<span class="uc-admin">ADMIN</span>' : ''}
+    <button id="btn-pin" title="Change my PIN">🔑</button>
     <button id="btn-logout">Log out</button>`;
   $('#btn-logout').onclick = () => logout(false);
+  $('#btn-pin').onclick = async () => {
+    const p1 = prompt('New PIN (min 4 characters):');
+    if (p1 === null) return;
+    if (p1.length < 4) return toast('PIN must be at least 4 characters.', 'err');
+    const p2 = prompt('Repeat the new PIN:');
+    if (p1 !== p2) return toast("PINs don't match — try again.", 'err');
+    try {
+      await api('/api/changepin', { pin: p1 });
+      toast('PIN updated! Use it next time you log in 🔑', 'ok');
+    } catch (err) { toast(err.message, 'err'); }
+  };
 }
 
 document.querySelectorAll('#tabs button').forEach(b => {
