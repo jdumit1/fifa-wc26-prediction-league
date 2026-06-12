@@ -328,13 +328,10 @@ function matchCard(m) {
       card.appendChild(advWrap);
     }
 
-    const conflict = (m.taken || []).find(t => t.h === d.h && t.a === d.a);
     const foot = el('div', 'mfoot');
     const dirty = draftDirty(m);
     if (m.myPred && !dirty) {
       foot.appendChild(el('span', 'mypick-chip', `Your pick: <b>${m.myPred.h} – ${m.myPred.a}</b>${m.myPred.adv ? ` <small>(${esc(teamName(m.myPred.adv === 'h' ? m.home : m.away))} adv.)</small>` : ''} ✏️ tap +/− to change`));
-    } else if (conflict) {
-      foot.appendChild(el('span', 'conflict-note', `⛔ ${d.h}–${d.a} is claimed by ${esc(conflict.avatar || '')} <b>${esc(conflict.user)}</b> — pick another score`));
     } else {
       const save = el('button', 'btn-save', m.myPred ? 'Update pick' : 'Lock in my pick 🎯');
       save.disabled = !dirty && !!m.myPred;
@@ -349,29 +346,11 @@ function matchCard(m) {
           confettiBurst(rect.left + rect.width / 2, rect.top, 28);
           toast('Pick saved! Good luck 🍀', 'ok');
           render();
-        } catch (err) {
-          toast(err.message, 'err');
-          refresh(); // someone may have just claimed this score — pull fresh state
-        }
+        } catch (err) { toast(err.message, 'err'); }
       };
       foot.appendChild(save);
     }
     card.appendChild(foot);
-
-    // scorelines other players have already claimed (unique-score rule)
-    if (m.taken && m.taken.length) {
-      const tk = el('div', 'fpicks', `<div class="fp-label">🏁 Claimed scores — first come, first served</div>`);
-      const list = el('div', 'fp-list');
-      for (const t of m.taken) {
-        list.insertAdjacentHTML('beforeend', `
-          <span class="fp-chip${conflict && t.user === conflict.user && t.h === conflict.h && t.a === conflict.a ? ' taken-conflict' : ''}" title="${esc(t.user)}">
-            <span>${esc(t.avatar || '⚽')}</span> ${esc(t.user)}
-            <span class="fp-score">${t.h}–${t.a}</span>
-          </span>`);
-      }
-      tk.appendChild(list);
-      card.appendChild(tk);
-    }
   }
 
   // my pick + points on locked/finished

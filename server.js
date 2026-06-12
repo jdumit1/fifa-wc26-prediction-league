@@ -259,22 +259,11 @@ function buildState(me) {
         }
       }
     }
-    // scorelines already claimed by other players (open matches only) —
-    // shown in the UI so you know which scores are off the board
-    let taken = null;
-    if (!locked) {
-      taken = [];
-      for (const [user, preds] of Object.entries(db.predictions)) {
-        if (user === me.username || !preds[m.no]) continue;
-        taken.push({ user, avatar: db.users[user]?.avatar, h: preds[m.no].h, a: preds[m.no].a });
-      }
-      taken.sort((x, y) => x.user.localeCompare(y.user));
-    }
     return {
       no: m.no, kickoff: m.kickoff, round: m.round, group: m.group || null,
       venue: m.venue, ...teams, locked, result,
       myPred, myScore: result && myPred ? myScores.perMatch[m.no] : null,
-      allPreds, taken,
+      allPreds,
       canOverride: m.round !== 'GROUP',
     };
   });
@@ -398,14 +387,6 @@ async function handleApi(req, res) {
     const H = Math.round(Number(h)), A = Math.round(Number(a));
     if (!Number.isFinite(H) || !Number.isFinite(A) || H < 0 || A < 0 || H > 20 || A > 20) {
       return json(res, 400, { error: 'Scores must be between 0 and 20.' });
-    }
-    // unique-score rule: each scoreline can be claimed by only one player per match
-    for (const [user, preds] of Object.entries(db.predictions)) {
-      if (user === me.username) continue;
-      const p = preds[m.no];
-      if (p && p.h === H && p.a === A) {
-        return json(res, 409, { error: `${H}–${A} is already claimed by ${user} — pick a different score!` });
-      }
     }
     const pred = { h: H, a: A };
     if (m.round !== 'GROUP' && H === A) {
