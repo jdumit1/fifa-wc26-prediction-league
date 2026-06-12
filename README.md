@@ -42,8 +42,11 @@ That keeps the league (users, picks, results) safe across deploys and restarts.
 - **Sign up once** with a username + PIN, log back in any time to continue.
 - **The first person to register becomes the ADMIN** — they enter the official results
   after each match (an "Admin: enter official result" link appears on every match card).
-- **Picks lock at kickoff.** Until then, nobody can see your prediction. After kickoff,
-  everyone's picks are revealed on the match card.
+- **Every scoreline is exclusive** — once a player claims, say, 2–1 for a match, nobody
+  else can pick 2–1 for that match. First come, first served: claimed scores show up on
+  the match card with who owns them, so picking early gets you the best scorelines.
+- **Picks lock at kickoff.** After kickoff everyone's picks (and points earned) are
+  revealed on the match card.
 - **Group tables compute themselves** from official results, including the
   8-best-third-placed-teams race.
 - **The bracket fills itself**: group winners/runners-up flow into the official Round of 32
