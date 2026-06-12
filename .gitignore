@@ -1,0 +1,7 @@
+# league database (users, hashed PINs, picks) — never commit
+data/db.json
+data/db.json.tmp
+
+.DS_Store
+node_modules/
+.gstack/

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FIFA World Cup 26 — Prediction League</title>
+  <link rel="icon" type="image/svg+xml" href="/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="pitch-glow"></div>
+  <canvas id="confetti"></canvas>
+
+  <!-- ============ AUTH ============ -->
+  <div id="auth" class="auth hidden">
+    <div class="auth-card">
+      <img src="/logo.svg" alt="FIFA World Cup 26" class="auth-logo">
+      <h1 class="auth-title">WORLD CUP <span>26</span></h1>
+      <p class="auth-sub">Prediction League · You vs. Your Friends</p>
+
+      <div class="auth-toggle">
+        <button id="tab-login" class="active">Log in</button>
+        <button id="tab-register">Join the league</button>
+      </div>
+
+      <form id="auth-form" autocomplete="off">
+        <label class="field">
+          <span>Username</span>
+          <input id="auth-user" type="text" maxlength="20" placeholder="e.g. Juan" required>
+        </label>
+        <label class="field">
+          <span>PIN <small>(min 4 characters — you'll use it to log back in)</small></span>
+          <input id="auth-pin" type="password" maxlength="30" placeholder="••••" required>
+        </label>
+
+        <div id="avatar-block" class="hidden">
+          <span class="field-label">Pick your badge</span>
+          <div id="avatar-grid" class="avatar-grid"></div>
+        </div>
+
+        <button type="submit" id="auth-submit" class="btn-primary">Log in</button>
+        <p id="auth-error" class="auth-error"></p>
+      </form>
+
+      <p class="auth-foot">⚽ 104 matches · 48 nations · One champion. Predict every score,<br>earn points, lift the (bragging-rights) trophy.</p>
+    </div>
+  </div>
+
+  <!-- ============ APP ============ -->
+  <div id="app" class="hidden">
+    <header class="topbar">
+      <div class="brand">
+        <img src="/logo.svg" alt="FIFA" class="brand-logo">
+        <div class="brand-text">
+          <span class="brand-title">WORLD CUP <em>26</em></span>
+          <span class="brand-sub">Prediction League</span>
+        </div>
+      </div>
+      <div class="user-chip" id="user-chip"></div>
+    </header>
+
+    <nav class="tabs" id="tabs">
+      <button data-tab="matches" class="active"><span class="tab-ico">📅</span>Matches</button>
+      <button data-tab="groups"><span class="tab-ico">🏟️</span>Groups</button>
+      <button data-tab="bracket"><span class="tab-ico">🏆</span>Bracket</button>
+      <button data-tab="leaderboard"><span class="tab-ico">👑</span>Leaderboard</button>
+    </nav>
+
+    <main id="view"></main>
+
+    <footer class="rules-foot">
+      <strong>Scoring:</strong>
+      <span class="pill pill-exact">Exact score +5</span>
+      <span class="pill pill-diff">Goal difference +3</span>
+      <span class="pill pill-outcome">Right winner +2</span>
+      <span class="pill pill-bonus">Knockout: who advances +1</span>
+      <span class="pill pill-lock">Picks lock at kickoff 🔒</span>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
