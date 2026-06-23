@@ -439,6 +439,25 @@ async function handleApi(req, res) {
     return json(res, 200, { ok: true });
   }
 
+  // Admin: reset another player's PIN (e.g. they forgot it). Sets a fresh
+  // salt + hash and logs that player out of any existing sessions. The admin
+  // never learns the old PIN — they just set a new temp one to share privately.
+  if (req.method === 'POST' && route === '/api/admin/resetpin') {
+    if (!me.admin) return json(res, 403, { error: 'Only the admin can reset another player\'s PIN.' });
+    const { username, pin } = await readBody(req);
+    if (String(pin || '').length < 4) return json(res, 400, { error: 'PIN must be at least 4 characters.' });
+    const name = Object.keys(db.users).find(u => u.toLowerCase() === String(username || '').trim().toLowerCase());
+    const u = name && db.users[name];
+    if (!u) return json(res, 404, { error: `No such player: ${username}` });
+    u.salt = crypto.randomBytes(16).toString('hex');
+    u.hash = hashPin(String(pin), u.salt);
+    for (const [tok, who] of Object.entries(db.tokens)) {
+      if (who === name) delete db.tokens[tok];
+    }
+    saveDb();
+    return json(res, 200, { ok: true, username: name });
+  }
+
   // Admin: record pre-app picks for friends — creates accounts if needed and
   // writes predictions even for locked matches (migration of off-app picks).
   if (req.method === 'POST' && route === '/api/backfill') {
