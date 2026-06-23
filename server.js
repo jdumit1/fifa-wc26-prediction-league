@@ -52,6 +52,16 @@ function authUser(req) {
   return username ? { username, ...db.users[username] } : null;
 }
 
+// An avatar is either a short emoji/text or a served image path under /avatars/.
+// Returns the cleaned value, or null if it's neither (used to reject junk).
+const AVATAR_IMG = /^\/avatars\/[\w.-]+\.(png|jpe?g|webp|gif|svg)$/i;
+function cleanAvatar(av) {
+  const s = String(av || '');
+  if (AVATAR_IMG.test(s)) return s;
+  if (s.length >= 1 && s.length <= 8 && !/[<>"'/\\]/.test(s)) return s;
+  return null;
+}
+
 // ---------- tournament engine ----------
 
 const ALL_MATCHES = [
@@ -309,6 +319,7 @@ function readBody(req) {
 const MIME = {
   '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript',
   '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon',
+  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif',
   '.json': 'application/json', '.woff2': 'font/woff2',
 };
 
@@ -475,6 +486,22 @@ async function handleApi(req, res) {
     }
     saveDb();
     return json(res, 200, { ok: true, deleted: name });
+  }
+
+  // Admin: set another player's avatar — an emoji or an image path served from
+  // public/avatars/ (e.g. "/avatars/emilio.png"). The image file must already
+  // be deployed; this only points the player's avatar at it.
+  if (req.method === 'POST' && route === '/api/admin/avatar') {
+    if (!me.admin) return json(res, 403, { error: 'Only the admin can change another player\'s avatar.' });
+    const { username, avatar } = await readBody(req);
+    const av = cleanAvatar(avatar);
+    if (!av) return json(res, 400, { error: 'Invalid avatar — use an emoji or an /avatars/<file>.png path.' });
+    const name = Object.keys(db.users).find(u => u.toLowerCase() === String(username || '').trim().toLowerCase());
+    const u = name && db.users[name];
+    if (!u) return json(res, 404, { error: `No such player: ${username}` });
+    u.avatar = av;
+    saveDb();
+    return json(res, 200, { ok: true, username: name, avatar: av });
   }
 
   // Admin: record pre-app picks for friends — creates accounts if needed and

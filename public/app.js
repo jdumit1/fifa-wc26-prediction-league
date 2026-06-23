@@ -33,6 +33,14 @@ function el(htmlTag, cls, html) {
   return e;
 }
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+// An avatar is normally an emoji, but it can also be an image path (e.g.
+// "/avatars/emilio.png") or URL — render those as a circular <img> instead.
+function isImgAvatar(av) { return typeof av === 'string' && /^(\/|https?:)/.test(av); }
+function avatarInner(av) {
+  return isImgAvatar(av)
+    ? `<img class="av-img" src="${esc(av)}" alt="" loading="lazy">`
+    : esc(av || '⚽');
+}
 
 function flagImg(code, cls = 'flag') {
   if (!code) return `<span class="flag-unknown">⚽</span>`;
@@ -155,7 +163,7 @@ function renderUserChip() {
   const me = S.leaderboard.find(u => u.username === S.me.username);
   const rank = S.leaderboard.findIndex(u => u.username === S.me.username) + 1;
   $('#user-chip').innerHTML = `
-    <span class="uc-av">${esc(S.me.avatar)}</span>
+    <span class="uc-av">${avatarInner(S.me.avatar)}</span>
     <span class="uc-name">${esc(S.me.username)}<small>${me ? me.total : 0} pts · #${rank}</small></span>
     ${S.me.admin ? '<span class="uc-admin">ADMIN</span>' : ''}
     <button id="btn-pin" title="Change my PIN">🔑</button>
@@ -384,7 +392,7 @@ function matchCard(m) {
       const ptsCls = !p.score ? '' : p.score.kind === 'exact' ? 'g' : p.score.kind === 'diff' ? 'gr' : p.score.pts > 0 ? 'b' : 'z';
       list.insertAdjacentHTML('beforeend', `
         <span class="fp-chip" title="${esc(p.user)}">
-          <span>${esc(p.avatar || '⚽')}</span> ${esc(p.user)}
+          <span>${avatarInner(p.avatar)}</span> ${esc(p.user)}
           <span class="fp-score">${p.h}–${p.a}</span>
           ${p.score ? `<span class="fp-pts ${ptsCls}">+${p.score.pts}</span>` : ''}
         </span>`);
@@ -615,7 +623,7 @@ function renderLeaderboard(view) {
     const pod = el('div', `pod pod-${idx + 1}`);
     pod.innerHTML = `
       <span class="pod-medal">${medal}</span>
-      <span class="pod-av">${esc(u.avatar)}</span>
+      <span class="pod-av">${avatarInner(u.avatar)}</span>
       <div class="pod-name">${esc(u.username)}</div>
       <div class="pod-pts">${u.total}</div>
       <div style="font-size:.66rem;color:var(--text-faint);letter-spacing:.1em">POINTS</div>`;
@@ -630,7 +638,7 @@ function renderLeaderboard(view) {
     row.style.animationDelay = `${i * 0.05}s`;
     row.innerHTML = `
       <span class="lb-rank">${i + 1}</span>
-      <span class="lb-av">${esc(u.avatar)}</span>
+      <span class="lb-av">${avatarInner(u.avatar)}</span>
       <span class="lb-name">${esc(u.username)} ${isMe ? '<span class="you">YOU</span>' : ''}${u.admin ? ' <span class="you" style="color:var(--text-faint)">ADMIN</span>' : ''}</span>
       <span class="lb-stats">
         <span class="lb-stat" title="Exact scores">🎯 ${u.counts.exact}</span>

@@ -194,6 +194,14 @@ input, select { font-family: inherit; }
   backdrop-filter: blur(10px);
 }
 .user-chip .uc-av { font-size: 1.4rem; }
+/* Image avatars: sized in em so they track each context's avatar font-size. */
+.av-img {
+  width: 1.15em; height: 1.15em;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: middle;
+  display: inline-block;
+}
 .user-chip .uc-name { font-weight: 700; font-size: 0.95rem; }
 .user-chip .uc-name small { display: block; color: var(--gold); font-weight: 700; font-size: 0.74rem; }
 .user-chip .uc-admin { font-size: 0.62rem; background: rgba(79,124,255,.25); border: 1px solid rgba(79,124,255,.5); color: #b9caff; padding: 2px 7px; border-radius: 99px; font-weight: 700; letter-spacing: .06em; }
