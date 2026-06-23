@@ -458,6 +458,25 @@ async function handleApi(req, res) {
     return json(res, 200, { ok: true, username: name });
   }
 
+  // Admin: delete a player's account entirely — removes the user, all their
+  // predictions, and any active sessions. Guarded: exact (case-insensitive)
+  // name match only, and you can't delete yourself or another admin.
+  if (req.method === 'POST' && route === '/api/admin/deleteuser') {
+    if (!me.admin) return json(res, 403, { error: 'Only the admin can delete a player.' });
+    const { username } = await readBody(req);
+    const name = Object.keys(db.users).find(u => u.toLowerCase() === String(username || '').trim().toLowerCase());
+    if (!name) return json(res, 404, { error: `No such player: ${username}` });
+    if (name === me.username) return json(res, 400, { error: 'You cannot delete your own account.' });
+    if (db.users[name].admin) return json(res, 400, { error: 'Cannot delete an admin account.' });
+    delete db.users[name];
+    delete db.predictions[name];
+    for (const [tok, who] of Object.entries(db.tokens)) {
+      if (who === name) delete db.tokens[tok];
+    }
+    saveDb();
+    return json(res, 200, { ok: true, deleted: name });
+  }
+
   // Admin: record pre-app picks for friends — creates accounts if needed and
   // writes predictions even for locked matches (migration of off-app picks).
   if (req.method === 'POST' && route === '/api/backfill') {
