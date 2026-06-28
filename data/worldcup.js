@@ -95,7 +95,7 @@ const GROUP_MATCHES = [
   [11, '2026-06-14T23:00Z', 'CIV', 'ECU', 'E', 'Philadelphia'],
   [12, '2026-06-15T02:00Z', 'SWE', 'TUN', 'F', 'Monterrey'],
   [13, '2026-06-15T16:00Z', 'ESP', 'CPV', 'H', 'Atlanta'],
-  [14, '2026-06-15T19:00Z', 'BEL', 'EGY', 'G', 'Vancouver'],
+  [14, '2026-06-15T19:00Z', 'BEL', 'EGY', 'G', 'Seattle'],
   [15, '2026-06-15T22:00Z', 'KSA', 'URU', 'H', 'Miami'],
   [16, '2026-06-16T01:00Z', 'IRN', 'NZL', 'G', 'Los Angeles'],
   [17, '2026-06-16T19:00Z', 'FRA', 'SEN', 'I', 'New York / NJ'],
@@ -195,10 +195,101 @@ const KO_MATCHES = [
   [104, '2026-07-19T19:00Z', 'F',   'New York / NJ', { t: 'WM', m: 101 },          { t: 'WM', m: 102 }],
 ];
 
-// Official results already played before the app was created (Day 1).
+// Final group-stage results (all 72), entered as official admin results.
 const SEED_RESULTS = {
-  1: { h: 2, a: 0 }, // Mexico 2-0 South Africa
-  2: { h: 2, a: 1 }, // South Korea 2-1 Czechia
+  // Group A
+  1: { h: 2, a: 0 },   // MEX 2-0 RSA
+  2: { h: 2, a: 1 },   // KOR 2-1 CZE
+  25: { h: 1, a: 1 },  // CZE 1-1 RSA
+  28: { h: 1, a: 0 },  // MEX 1-0 KOR
+  53: { h: 0, a: 3 },  // CZE 0-3 MEX
+  54: { h: 1, a: 0 },  // RSA 1-0 KOR
+  // Group B
+  3: { h: 1, a: 1 },   // CAN 1-1 BIH
+  5: { h: 1, a: 1 },   // QAT 1-1 SUI
+  26: { h: 4, a: 1 },  // SUI 4-1 BIH
+  27: { h: 6, a: 0 },  // CAN 6-0 QAT
+  49: { h: 2, a: 1 },  // SUI 2-1 CAN
+  50: { h: 3, a: 1 },  // BIH 3-1 QAT
+  // Group D
+  4: { h: 4, a: 1 },   // USA 4-1 PAR
+  8: { h: 2, a: 0 },   // AUS 2-0 TUR
+  29: { h: 2, a: 0 },  // USA 2-0 AUS
+  32: { h: 0, a: 1 },  // TUR 0-1 PAR
+  59: { h: 3, a: 2 },  // TUR 3-2 USA
+  60: { h: 0, a: 0 },  // PAR 0-0 AUS
+  // Group C
+  6: { h: 1, a: 1 },   // BRA 1-1 MAR
+  7: { h: 0, a: 1 },   // HAI 0-1 SCO
+  30: { h: 0, a: 1 },  // SCO 0-1 MAR
+  31: { h: 3, a: 0 },  // BRA 3-0 HAI
+  51: { h: 0, a: 3 },  // SCO 0-3 BRA
+  52: { h: 4, a: 2 },  // MAR 4-2 HAI
+  // Group E
+  9: { h: 7, a: 1 },   // GER 7-1 CUW
+  11: { h: 1, a: 0 },  // CIV 1-0 ECU
+  34: { h: 2, a: 1 },  // GER 2-1 CIV
+  35: { h: 0, a: 0 },  // ECU 0-0 CUW
+  55: { h: 2, a: 1 },  // ECU 2-1 GER
+  56: { h: 0, a: 2 },  // CUW 0-2 CIV
+  // Group F
+  10: { h: 2, a: 2 },  // NED 2-2 JPN
+  12: { h: 5, a: 1 },  // SWE 5-1 TUN
+  33: { h: 5, a: 1 },  // NED 5-1 SWE
+  36: { h: 0, a: 4 },  // TUN 0-4 JPN
+  57: { h: 1, a: 1 },  // JPN 1-1 SWE
+  58: { h: 1, a: 3 },  // TUN 1-3 NED
+  // Group H
+  13: { h: 0, a: 0 },  // ESP 0-0 CPV
+  15: { h: 1, a: 1 },  // KSA 1-1 URU
+  37: { h: 4, a: 0 },  // ESP 4-0 KSA
+  39: { h: 2, a: 2 },  // URU 2-2 CPV
+  63: { h: 0, a: 0 },  // CPV 0-0 KSA
+  64: { h: 0, a: 1 },  // URU 0-1 ESP
+  // Group G
+  14: { h: 1, a: 1 },  // BEL 1-1 EGY
+  16: { h: 2, a: 2 },  // IRN 2-2 NZL
+  38: { h: 0, a: 0 },  // BEL 0-0 IRN
+  40: { h: 1, a: 3 },  // NZL 1-3 EGY
+  65: { h: 1, a: 1 },  // EGY 1-1 IRN
+  66: { h: 1, a: 5 },  // NZL 1-5 BEL
+  // Group I
+  17: { h: 3, a: 1 },  // FRA 3-1 SEN
+  18: { h: 1, a: 4 },  // IRQ 1-4 NOR
+  42: { h: 3, a: 0 },  // FRA 3-0 IRQ
+  43: { h: 3, a: 2 },  // NOR 3-2 SEN
+  61: { h: 1, a: 4 },  // NOR 1-4 FRA
+  62: { h: 5, a: 0 },  // SEN 5-0 IRQ
+  // Group J
+  19: { h: 3, a: 0 },  // ARG 3-0 ALG
+  20: { h: 3, a: 1 },  // AUT 3-1 JOR
+  41: { h: 2, a: 0 },  // ARG 2-0 AUT
+  44: { h: 1, a: 2 },  // JOR 1-2 ALG
+  71: { h: 3, a: 3 },  // ALG 3-3 AUT
+  72: { h: 1, a: 3 },  // JOR 1-3 ARG
+  // Group K
+  21: { h: 1, a: 1 },  // POR 1-1 COD
+  24: { h: 1, a: 3 },  // UZB 1-3 COL
+  45: { h: 5, a: 0 },  // POR 5-0 UZB
+  48: { h: 1, a: 0 },  // COL 1-0 COD
+  69: { h: 0, a: 0 },  // COL 0-0 POR
+  70: { h: 3, a: 1 },  // COD 3-1 UZB
+  // Group L
+  22: { h: 4, a: 2 },  // ENG 4-2 CRO
+  23: { h: 1, a: 0 },  // GHA 1-0 PAN
+  46: { h: 0, a: 0 },  // ENG 0-0 GHA
+  47: { h: 0, a: 1 },  // PAN 0-1 CRO
+  67: { h: 0, a: 2 },  // PAN 0-2 ENG
+  68: { h: 2, a: 1 },  // CRO 2-1 GHA
 };
 
-module.exports = { TEAMS, GROUPS, GROUP_MATCHES, KO_MATCHES, SEED_RESULTS };
+// Official R32 third-place slottings the constraint-matcher can't infer on its
+// own (FIFA uses a fixed allocation table). Away slot is the third in each.
+const SEED_OVERRIDES = {
+  74: { home: null, away: 'PAR' }, // Germany vs Paraguay (3rd D)
+  77: { home: null, away: 'SWE' }, // France vs Sweden (3rd F)
+  82: { home: null, away: 'SEN' }, // Belgium vs Senegal (3rd I)
+  85: { home: null, away: 'ALG' }, // Switzerland vs Algeria (3rd J)
+};
+
+module.exports = { TEAMS, GROUPS, GROUP_MATCHES, KO_MATCHES, SEED_RESULTS, SEED_OVERRIDES };

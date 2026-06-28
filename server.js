@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const { TEAMS, GROUPS, GROUP_MATCHES, KO_MATCHES, SEED_RESULTS } = require('./data/worldcup');
+const { TEAMS, GROUPS, GROUP_MATCHES, KO_MATCHES, SEED_RESULTS, SEED_OVERRIDES } = require('./data/worldcup');
 
 const PORT = process.env.PORT || 4226;
 // On Railway/production, set DB_FILE to a path on a persistent volume (e.g. /data/db.json)
@@ -29,6 +29,7 @@ function loadDb() {
     db = Object.assign(db, JSON.parse(fs.readFileSync(DB_FILE, 'utf8')));
   } catch {
     db.results = { ...SEED_RESULTS };
+    db.overrides = { ...SEED_OVERRIDES };
     saveDb();
   }
 }
