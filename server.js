@@ -27,11 +27,24 @@ let db = {
 function loadDb() {
   try {
     db = Object.assign(db, JSON.parse(fs.readFileSync(DB_FILE, 'utf8')));
+    backfillSeeds(); // top up missing official results/overrides on existing DBs
   } catch {
     db.results = { ...SEED_RESULTS };
     db.overrides = { ...SEED_OVERRIDES };
     saveDb();
   }
+}
+
+// Idempotently add official results/overrides that aren't present yet. Only
+// fills gaps — never overwrites an existing result/override, and never touches
+// users, tokens, or predictions. Safe to run on every boot.
+function backfillSeeds() {
+  let changed = false;
+  for (const [no, r] of Object.entries(SEED_RESULTS))
+    if (!(no in db.results)) { db.results[no] = r; changed = true; }
+  for (const [no, o] of Object.entries(SEED_OVERRIDES))
+    if (!(no in db.overrides)) { db.overrides[no] = o; changed = true; }
+  if (changed) saveDb();
 }
 
 function saveDb() {
